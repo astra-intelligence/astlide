@@ -1,11 +1,11 @@
 import starlight from "@astrojs/starlight";
 import { defineConfig } from "astro/config";
+import { base, sidebar, site } from "./site.mjs";
 
 // Published at https://r-hashi01.github.io/astlide/ by .github/workflows/pages.yml,
 // alongside the live demo deck (/astlide/demo/) and the TypeDoc API reference
-// (/astlide/api/).
-const site = "https://r-hashi01.github.io";
-const base = "/astlide";
+// (/astlide/api/). Agents read the docs from /astlide/llms.txt and
+// /astlide/llms-full.txt (src/pages/).
 
 export default defineConfig({
 	site,
@@ -36,52 +36,7 @@ export default defineConfig({
 				root: { label: "English", lang: "en" },
 				ja: { label: "日本語", lang: "ja" },
 			},
-			sidebar: [
-				{ label: "Why Astlide?", translations: { ja: "なぜ Astlide？" }, slug: "why" },
-				{ label: "Getting Started", translations: { ja: "はじめに" }, slug: "getting-started" },
-				{ slug: "tutorial/first-deck" },
-				{ slug: "gallery" },
-				{
-					label: "Guides",
-					translations: { ja: "ガイド" },
-					items: [
-						{ slug: "guides/decks" },
-						{ slug: "guides/layouts-and-components" },
-						{ slug: "guides/frameworks" },
-						{ slug: "guides/fragments" },
-						{ slug: "guides/code" },
-						{ slug: "guides/diagrams" },
-						{ slug: "guides/presenting" },
-						{ slug: "guides/themes-and-plugins" },
-						{ slug: "guides/export" },
-						{ slug: "guides/import" },
-						{ slug: "guides/templates" },
-						{ slug: "guides/server" },
-						{ slug: "guides/deploy" },
-						{ slug: "guides/embed" },
-					],
-				},
-				{
-					label: "Reference",
-					translations: { ja: "リファレンス" },
-					items: [
-						{ slug: "reference/configuration" },
-						{ slug: "reference/frontmatter" },
-						{
-							label: "API (TypeDoc)",
-							translations: { ja: "API（TypeDoc）" },
-							link: `${site}${base}/api/`,
-							attrs: { target: "_blank" },
-						},
-					],
-				},
-				{
-					label: "Live demo ↗",
-					translations: { ja: "ライブデモ ↗" },
-					link: `${site}${base}/demo/tour/1/`,
-					attrs: { target: "_blank" },
-				},
-			],
+			sidebar,
 		}),
 	],
 });
