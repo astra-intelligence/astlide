@@ -1,3 +1,4 @@
+import { randomBytes } from "node:crypto";
 import { existsSync } from "node:fs";
 import { dirname, join } from "node:path";
 import { fileURLToPath, pathToFileURL } from "node:url";
@@ -16,6 +17,7 @@ import { astlideVirtualPlugin } from "./internal/virtual-plugins";
 import { type AstlidePlugin, BUILT_IN_PLUGIN, resolvePlugins } from "./plugin";
 import { astlideCodeHighlight } from "./utils/code-highlight";
 import { astlideCommentNotesPlugin } from "./utils/comment-notes";
+import { hashBuiltPages } from "./utils/csp-hashes";
 import { EXPORT_BUILD_ENV, requestedExportBuild } from "./utils/export-build";
 import { resolveFavicon } from "./utils/favicon";
 import { astlideMermaid } from "./utils/mermaid";
@@ -53,19 +55,29 @@ export interface AstlideOptions {
 	 * - `false`: disable CSP entirely
 	 * - `string`: use a custom CSP policy string
 	 *
-	 * During `astro dev`, `worker-src 'self' blob:` is added (unless the policy sets
-	 * `worker-src`) so Vite's client can reconnect after a server restart. Built
-	 * output gets the policy as is.
+	 * In a build, the default policy allows inline scripts by hash, not
+	 * `'unsafe-inline'`: after `astro build`, the inline `<script>`s Astlide and
+	 * Astro put on each page, and those of MDX slides and their components
+	 * (code), are hashed into its `script-src`. Inline scripts in Markdown, HTML
+	 * and PowerPoint slides are not (see `slideScripts`), nor are inline
+	 * event-handler attributes or `javascript:` URLs — those don't run. `style-src` keeps `'unsafe-inline'` for `style` attributes. A custom
+	 * policy string is used as is.
+	 *
+	 * During `astro dev`, scripts stay on `'unsafe-inline'`, and
+	 * `worker-src 'self' blob:` is added (unless the policy sets `worker-src`) so
+	 * Vite's client can reconnect after a server restart.
 	 */
 	csp?: boolean | string;
 	/**
 	 * Let `<script>`s, inline event handlers (`onclick` …) and `javascript:`
 	 * URLs in Markdown, HTML and PowerPoint slides run — in `astro dev` and in
-	 * built pages. Default `false`: they are removed when the slide is rendered,
-	 * because slide content can come from others (an imported `.pptx`, an HTML
-	 * slide someone sent), and in `astro dev` such a script would run next to
-	 * the slide editor. MDX slides are code and always keep their scripts. Turn
-	 * it on only for decks whose content you fully trust.
+	 * built pages, where their hashes join the default CSP. Default `false`:
+	 * they are removed when the slide is rendered (and the CSP wouldn't allow
+	 * them either), because slide content can come from others (an imported
+	 * `.pptx`, an HTML slide someone sent), and in `astro dev` such a script
+	 * would run next to the slide editor. MDX slides are code and always keep
+	 * their scripts. Turn it on only for decks whose content you fully trust;
+	 * for a script you want on your slides, prefer an MDX slide or a component.
 	 */
 	slideScripts?: boolean;
 	/**
@@ -335,6 +347,9 @@ export default function astlide(options: AstlideOptions = {}): AstroIntegration 
 	let devProtocol = "http";
 	// Read by the deck loader, which runs in this process.
 	setSlideScripts(options.slideScripts === true);
+	// Marks where slide content starts and ends in a page, for the CSP pass
+	// after the build: random per build, so content can't fake the end mark.
+	const slideMark = randomBytes(16).toString("hex");
 
 	return {
 		name: "astlide",
@@ -485,6 +500,7 @@ export default function astlide(options: AstlideOptions = {}): AstroIntegration 
 						define: {
 							// Expose options to injected pages via Vite define
 							__ASTLIDE_CSP__: JSON.stringify(options.csp ?? true),
+							__ASTLIDE_SLIDE_MARK__: JSON.stringify(slideMark),
 							__ASTLIDE_INDEXABLE__: JSON.stringify(options.indexable ?? false),
 							__ASTLIDE_THEME_NAMES__: JSON.stringify([...resolved.themeNames]),
 							__ASTLIDE_LAYOUT_NAMES__: JSON.stringify([...resolved.layoutNames]),
@@ -574,6 +590,22 @@ export default function astlide(options: AstlideOptions = {}): AstroIntegration 
 					`Slide editor: open ${devProtocol}://localhost:${address.port}${EDITOR_UNLOCK_ENDPOINT}?code=${unlockCodes.issue()} ` +
 						`in your browser to enable editing (works once, for ${minutes} minutes)`,
 				);
+			},
+			// Built pages: the default CSP's script-src gets the hashes of the inline
+			// scripts Astlide and Astro put on pages, in place of 'unsafe-inline'
+			// (slide scripts only with slideScripts; see utils/csp-hashes).
+			"astro:build:done": async ({ dir, logger }) => {
+				const { pages, blocked } = await hashBuiltPages(fileURLToPath(dir), {
+					mark: slideMark,
+					slideScripts: options.slideScripts,
+				});
+				if (pages) logger.info(`CSP: inline scripts hashed in ${pages} page(s)`);
+				if (blocked.length)
+					logger.warn(
+						`${blocked.length} page(s) have inline <script>s in slides, which won't run in the ` +
+							"built site (CSP). Move them into a component, or set slideScripts: true if you " +
+							`fully trust the decks' content. First: ${blocked[0]?.file}`,
+					);
 			},
 		},
 	};
