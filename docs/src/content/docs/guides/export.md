@@ -21,13 +21,15 @@ A deck can also be given as a path (`src/content/decks/my-talk`, `dist/my-talk`,
   Chromium keeps its sandbox while it renders the slides. On Linux that needs unprivileged user namespaces; if your system restricts them (Ubuntu 24.04, many containers), the export stops with how to allow them for Chromium only (see [Chromium sandbox on Linux](#chromium-sandbox-on-linux)). `ASTLIDE_CHROMIUM_SANDBOX=0` turns the sandbox off — only for decks whose content you trust.
 - **PPTX** needs no browser: the built slides are laid out by Astlide's own CSS layout engine and written as native shapes and editable text boxes. The fonts your theme loads are embedded in the file, so PowerPoint shows the slides in them without the fonts installed (fonts whose license forbids embedding are left out). Tables become PowerPoint tables, and boxes, CSS `::before` / `::after` text and simple inline SVG drawings (rectangles, circles, lines and arrows, paths, text) become shapes you can edit. Mermaid diagrams are rendered without a browser too (the project's `mermaid` install) and placed as pictures, as are SVG drawings that use more than that (gradients, arcs …); PNG and SVG images are included. Speaker notes go into PowerPoint's notes pane. Japanese (and other East Asian) text is given an East Asian font — the CJK font your CSS names, else Yu Gothic, which comes with Office — and is laid out with a Japanese font, so lines break as in the browser.
 
+Exports start from a build of their own, in `node_modules/.astro/astlide-export` rather than `dist/`. It includes speaker notes (they go into the PPTX) whatever the [`notes` option](/guides/decks/#speaker-notes) says, and leaves the `dist/` you deploy untouched.
+
 | Option | |
 |---|---|
 | `--pdf` `--pptx` `--png` | Formats, combine as needed (default `--pdf`) |
 | `--all` | Every deck |
 | `--out-dir <dir>` | Where exports go (default `exports/`) |
 | `-o, --output <path>` | Exact output path (one deck, one format) |
-| `--no-build` | Use the existing `dist/` instead of building first |
+| `--no-build` | Reuse the last export build instead of building first (else `dist/`, which has speaker notes only with `notes: "public"`) |
 | `--base-url <url>` | PDF / PNG: render from a dev / preview server you already run (include the `base`, e.g. `http://localhost:4321/my-repo`) |
 | `--width` / `--height` | PDF / PNG: slide size in px (default 1920×1080) |
 
