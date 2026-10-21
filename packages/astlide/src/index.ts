@@ -3,7 +3,11 @@ import { dirname, join } from "node:path";
 import { fileURLToPath } from "node:url";
 import mdx from "@astrojs/mdx";
 import type { AstroIntegration } from "astro";
-import { astlideEditorPlugin, DEV_RELOAD_SCRIPT } from "./internal/editor-server";
+import {
+	astlideEditorPlugin,
+	createEditorToken,
+	DEV_RELOAD_SCRIPT,
+} from "./internal/editor-server";
 import { astlideVirtualPlugin } from "./internal/virtual-plugins";
 import { type AstlidePlugin, BUILT_IN_PLUGIN, resolvePlugins } from "./plugin";
 import { astlideCodeHighlight } from "./utils/code-highlight";
@@ -354,6 +358,9 @@ export default function astlide(options: AstlideOptions = {}): AstroIntegration 
 				}
 
 				// Dev: pages that don't live-update reload on the editor's HMR events.
+				// The editor endpoint only answers requests carrying this server's token,
+				// which only the dev server's own pages on this machine can fetch.
+				const editorToken = createEditorToken();
 				if (command === "dev") injectScript("page", DEV_RELOAD_SCRIPT);
 
 				// Optional `mermaid` (```mermaid diagrams): exposed via virtual:astlide/mermaid.
@@ -396,7 +403,7 @@ export default function astlide(options: AstlideOptions = {}): AstroIntegration 
 								loadTemplate(t.theme, t.source, root, config.base),
 							) as never,
 							// Dev-only (apply: "serve"): read/write endpoint for the `e` slide editor.
-							astlideEditorPlugin(fileURLToPath(config.root)) as never,
+							astlideEditorPlugin(fileURLToPath(config.root), editorToken) as never,
 							// Speaker notes as a trailing `<!-- … -->`: MDX would reject the comment.
 							astlideCommentNotesPlugin() as never,
 						],
