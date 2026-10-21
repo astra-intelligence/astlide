@@ -125,6 +125,29 @@ describe("pptxToSlides", () => {
 		expect(withFiles.slides[1]?.html).toMatch(/<img src="\/assets\/[^"]+\.png"/);
 	});
 
+	it("inlines SVG pictures instead of handing them to the media callback", async () => {
+		// The fixture's picture, swapped for an SVG holding a script.
+		const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="10" height="10"><script>alert(1)</script><rect width="10" height="10"/></svg>`;
+		const files = readZip(await fixture());
+		const zip = new ZipWriter();
+		for (const name of files.keys()) {
+			const data = files.get(name) as Buffer;
+			if (/^ppt\/media\/.*\.png$/.test(name)) zip.add(name.replace(/\.png$/, ".svg"), svg);
+			else if (name.endsWith(".rels") || name === "[Content_Types].xml")
+				zip.add(name, data.toString("utf-8").replace(/(media\/[^"]+)\.png"/g, '$1.svg"'));
+			else zip.add(name, data);
+		}
+		const handed: string[] = [];
+		const deck = pptxToSlides(zip.toBuffer(), {
+			media: (f) => {
+				handed.push(f.type);
+				return `/assets/${f.name}`;
+			},
+		});
+		expect(handed).not.toContain("image/svg+xml");
+		expect(deck.slides[1]?.html).toMatch(/<img src="data:image\/svg\+xml;base64,/);
+	});
+
 	it("rejects files that aren't PowerPoint", () => {
 		expect(() => pptxToSlides(Buffer.from("not a zip"))).toThrow(/ZIP/);
 	});
