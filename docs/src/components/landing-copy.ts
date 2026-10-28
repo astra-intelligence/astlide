@@ -21,11 +21,11 @@ export const copy: Record<"en" | "ja", Copy> = {
 		command: "Command",
 		copy: "Copy command",
 		copied: "Copied",
-		sourceCaption: "/tour/4 in the corporate theme",
-		sourceAlt: "The Markdown file above, rendered as a slide",
+		sourceCaption: "The same file at /tour/4, in the corporate theme",
+		sourceAlt: "The Markdown file above, shown as a slide",
 		decks: {
-			title: "A folder per deck, one site for all of them",
-			body: "A year of talks, a team’s weekly reports, the onboarding decks. They share themes and components, deploy together and get an index page.",
+			title: "Keep every deck in one site",
+			body: "A deck is a folder of slide files. Put your talks, weekly reports and training decks side by side: they share themes and components, deploy together and get an index page.",
 			shots: [
 				{ alt: "A slide in the dark theme", caption: "talks-2026 · dark" },
 				{ alt: "A slide in the forest theme", caption: "onboarding · forest" },
@@ -34,38 +34,44 @@ export const copy: Record<"en" | "ja", Copy> = {
 			],
 		},
 		templates: {
-			title: "Your PowerPoint template in, editable PowerPoint out",
-			body: "Register a .pptx or .potx as a theme. Headings land in its title placeholders and the rest in its body, in its fonts and colors. The export writes real text boxes, tables and shapes with your speaker notes, laid out without a browser.",
+			title: "Use your company’s PowerPoint template",
+			body: "Register a .pptx or .potx as a theme, and your Markdown slides take on its layouts, fonts and colors. Export to PowerPoint and you get real text boxes, tables and shapes, with your speaker notes, that anyone can edit. Layout happens without a browser.",
 		},
 		more: {
-			title: "Also in the box",
+			title: "Also included",
 			items: [
 				[
 					"Presenter window",
-					"Next slide, notes, timer, pen and laser, mirrored to the audience screen.",
+					"Your notes, the next slide and a timer. Pen and laser show on the audience screen too.",
 				],
-				["Reveals", "<Fragment> steps, and code that highlights line by line."],
+				[
+					"Step-by-step reveals",
+					"Show items one at a time with <Fragment>, and walk through code line by line.",
+				],
 				[
 					"Diagrams and math",
-					"Mermaid, loaded when a slide needs it. KaTeX, rendered at build time.",
+					"Mermaid loads only on slides that use it. KaTeX is rendered at build time.",
 				],
-				["PDF and PNG", "From the command line, or with one click in the browser."],
-				["Import", "A .pptx from PowerPoint or Google Slides becomes editable HTML slides."],
-				["Static pages", "Every slide has a URL. Host it anywhere, sub-paths included."],
+				["PDF and PNG", "Export from the command line, or with one button in the browser."],
+				["Import", "Turn a .pptx from PowerPoint or Google Slides into slides you can edit."],
+				[
+					"A URL per slide",
+					"Every slide is a static page you can link to. Host it anywhere, sub-paths included.",
+				],
 			],
-			compare: "How it compares to Slidev, Marp, reveal.js and Quarto",
+			compare: "How Astlide compares to Slidev, Marp, reveal.js and Quarto",
 		},
-		start: "Start with a deck of your own",
+		start: "Make your first deck",
 	},
 	ja: {
 		command: "コマンド",
 		copy: "コマンドをコピー",
 		copied: "コピーしました",
-		sourceCaption: "/tour/4 を corporate テーマで表示",
+		sourceCaption: "このファイルを corporate テーマで表示したもの（/tour/4）",
 		sourceAlt: "上の Markdown ファイルをスライドとして表示したもの",
 		decks: {
-			title: "デッキはフォルダ 1 つ。全部を 1 つのサイトに",
-			body: "1 年分の登壇資料、チームの週次報告、新人研修のデッキ。テーマとコンポーネントを共有して、まとめてデプロイでき、一覧ページも付いてきます。",
+			title: "デッキをいくつでも 1 つのサイトに",
+			body: "デッキは、スライドのファイルを入れたフォルダーです。登壇資料も週次報告も研修資料も同じサイトに置けば、テーマやコンポーネントを使い回せて、デプロイも 1 回で済みます。デッキの一覧ページも自動で作られます。",
 			shots: [
 				{ alt: "dark テーマのスライド", caption: "talks-2026 · dark" },
 				{ alt: "forest テーマのスライド", caption: "onboarding · forest" },
@@ -74,31 +80,37 @@ export const copy: Record<"en" | "ja", Copy> = {
 			],
 		},
 		templates: {
-			title: "自社の PowerPoint テンプレートで書き、編集できる PowerPoint で渡す",
-			body: ".pptx か .potx をテーマとして登録すると、見出しはテンプレートのタイトル枠に、それ以外は本文の枠に入り、テンプレートのフォントと色で表示されます。書き出したファイルは本物のテキストボックス・表・図形でできていて、発表者ノートも入ります。レイアウトの計算にブラウザは使いません。",
+			title: "会社の PowerPoint テンプレートをそのまま使える",
+			body: "テンプレート（.pptx / .potx）をテーマとして登録すると、Markdown のスライドがテンプレートのレイアウト・フォント・色で表示されます。PowerPoint に書き出せば、文字も表も図形も PowerPoint 上でそのまま編集でき、発表者ノートも付いてきます。レイアウトの計算にブラウザは使いません。",
 		},
 		more: {
-			title: "ほかにも入っているもの",
+			title: "そのほかの機能",
 			items: [
 				[
 					"発表者ウィンドウ",
-					"次のスライド、ノート、タイマー、ペンとレーザー。操作は聴衆側の画面にも映ります。",
+					"発表者ノート、次のスライド、経過時間を手元に表示します。ペンやレーザーポインターは聴衆側の画面にも映ります。",
 				],
-				["段階表示", "<Fragment> で順に表示できます。コードも 1 行ずつハイライトできます。"],
-				["図と数式", "Mermaid は必要なスライドでだけ読み込み、KaTeX はビルド時に描画します。"],
-				["PDF と PNG", "コマンドラインからでも、ブラウザのボタン 1 つでも書き出せます。"],
+				[
+					"段階表示",
+					"<Fragment> で項目を 1 つずつ表示できます。コードも 1 行ずつ順に強調できます。",
+				],
+				[
+					"図と数式",
+					"Mermaid の図は、使うスライドでだけ読み込みます。KaTeX の数式はビルド時に描画します。",
+				],
+				["PDF と PNG", "コマンドラインからも、ブラウザのボタン 1 つでも書き出せます。"],
 				[
 					"取り込み",
-					"PowerPoint や Google スライドの .pptx を、編集できる HTML スライドにします。",
+					"PowerPoint や Google スライドの .pptx を、編集できるスライドに変換できます。",
 				],
 				[
-					"静的なページ",
-					"スライド 1 枚ごとに URL があります。サブパスを含めて、どこにでも置けます。",
+					"スライドごとの URL",
+					"スライドは 1 枚ずつ静的なページになるので、直接リンクできます。サブパスも含め、どこにでも公開できます。",
 				],
 			],
 			compare: "Slidev・Marp・reveal.js・Quarto との比較",
 		},
-		start: "自分のデッキを作ってみる",
+		start: "最初のデッキを作ってみる",
 	},
 };
 

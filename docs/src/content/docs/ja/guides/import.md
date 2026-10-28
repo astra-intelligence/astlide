@@ -1,15 +1,21 @@
 ---
 title: PowerPoint と Google スライドの取り込み
-description: .pptx をそのまま Astlide のスライドとして表示したり、編集可能なデッキに変換したりします。
+description: .pptx をそのまま Astlide のスライドとして表示する方法と、編集できるデッキに変換する方法です。
 ---
 
-Astlide は PowerPoint ファイルを読み込めます。各ページが Astlide のスライドになり、テキストはテキストのまま、図形・画像・表は元の位置に配置されます。プレースホルダーの位置と文字スタイルはスライドレイアウトとスライドマスターから取得し、テーマの色とフォントも解決します。スピーカーノート、タイトル、非表示スライドも引き継がれます。
+Astlide で PowerPoint のファイル（`.pptx`）を使う方法は 2 つあります。1 つは、`.pptx` をデッキのフォルダーに置いて、そのまま表示する方法です。もう 1 つは、一度だけ `.html` のスライドに変換し、以降はそのファイルを編集していく方法です。
 
-Google スライドと Keynote は、PowerPoint 形式で書き出せば使えます。テンプレートのデザインで新しいスライドを Markdown で書きたい場合は、[PowerPoint テンプレート](/ja/guides/templates/)を参照してください。
+どちらの方法でも、PowerPoint の 1 ページが Astlide のスライド 1 枚になります。テキストは画像にならず、テキストのまま残ります。図形・画像・表は元の位置に配置されます。プレースホルダーの位置と文字のスタイルは、スライドレイアウトとスライドマスターから取ります。テーマの色とフォントも反映され、発表者ノート、スライドのタイトル、非表示スライドの設定も引き継がれます。
+
+読み込めるのは `.pptx` だけです。Google スライド、Keynote、`.ppt`、`.odp` のファイルは、先に PowerPoint 形式で保存するかダウンロードしてください。Google スライドは URL から直接取り込むこともできます（[後述](#google-スライド)）。PowerPoint のデザインを使って新しいスライドを Markdown で書きたい場合は、[PowerPoint テンプレート](/ja/guides/templates/)を参照してください。
+
+:::note
+どちらの方法でも、`decks` コレクションのローダーが `astlideDeckLoader()` になっている必要があります（[はじめに](/ja/getting-started/#既存の-astro-プロジェクトに追加する)を参照）。`bun create astlide` で作ったプロジェクトは、書き換えるまで `.mdx` のファイルしか読み込みません。
+:::
 
 ## .pptx をそのまま表示する
 
-ファイルをデッキのフォルダに、ほかのスライドと並べて置きます。
+`.pptx` を、ほかのスライドと同じデッキのフォルダーに置きます。
 
 ```
 src/content/decks/q3-review/
@@ -19,37 +25,48 @@ src/content/decks/q3-review/
 └── 03-next-steps.mdx
 ```
 
-各ページはほかのファイルと一緒にファイル名順に並び（`02-numbers.pptx` → `02-numbers--001`、`02-numbers--002` …）、発表者ウィンドウ、一覧表示、ノート、PDF / PPTX エクスポートもほかのスライドと同じように使えます。`.pptx` を編集して保存すると、デッキにも反映されます。ファイルに埋め込まれた画像とフォントは Astlide が（`/_astlide/pptx/` から）配信します。
+ファイルの各ページは、ファイル名に連番を付けた名前のスライドになります。この例では `02-numbers--001`、`02-numbers--002` と続きます。並び順はほかのスライドとまとめてファイル名で決まるので、`01-intro.md` の後、`03-next-steps.mdx` の前に入ります。
 
-## 編集可能なデッキに取り込む
+こうして表示したスライドも、発表者ウィンドウ、一覧、発表者ノート、PDF / PPTX のエクスポートでほかのスライドと同じように扱えます。`.pptx` を編集して保存すると、デッキにも反映されます。ファイルに埋め込まれた画像とフォントは、Astlide が `/_astlide/pptx/` から配信します。
+
+## 編集できるデッキに取り込む
 
 ```bash
 bunx astlide import ~/Downloads/kickoff.pptx --deck kickoff
 ```
 
-このコマンドは、ページごとに 1 つの `.html` スライドを `src/content/decks/kickoff/` に書き出します。タイトル、ノート、`hidden` は frontmatter に入り、図形は 1 行に 1 つずつ並びます。画像は `public/pptx/kickoff/` に書き出され、`_config.json` も作られます。あとはふつうのファイルなので、編集しても、Markdown のスライドを混ぜても、テーマを変えてもかまいません。
+このコマンドを実行すると、次のファイルが作られます。
+
+- `src/content/decks/kickoff/`: 1 ページにつき 1 つの `.html` スライドと `_config.json`。スライドのタイトル、ノート、`hidden` は frontmatter に入り、本文には図形が 1 行に 1 つずつ書かれます。
+- `public/pptx/kickoff/`: 画像
+
+取り込んだあとのスライドは、普通のファイルとして扱えます。中身を編集しても、同じデッキに Markdown のスライドを加えても、テーマを変えてもかまいません。
 
 | オプション | |
 |---|---|
-| `--deck <name>` | デッキのフォルダ名（デフォルト: ファイル名から決定） |
-| `--force` | 既存のデッキフォルダを置き換える |
-| `--cwd <dir>` | プロジェクトのルート（デフォルト: カレントディレクトリから探索） |
+| `--deck <name>` | デッキのフォルダー名（省略時はファイル名から決めます） |
+| `--force` | 同じ名前のデッキのフォルダーと画像があれば、置き換えます |
+| `--cwd <dir>` | プロジェクトのルート（省略時は、カレントディレクトリから上にたどって最初に `src/content/decks` があるフォルダー） |
 
 ### Google スライド
 
-デッキの URL を渡します。PowerPoint 形式でダウンロードされるので、デッキが「リンクを知っている全員」に共有されている必要があります。そうでない場合は、Google スライドの「ファイル → ダウンロード → Microsoft PowerPoint」でダウンロードしてから、そのファイルを取り込んでください。
+ファイルの代わりにデッキの URL を渡すと、Astlide が PowerPoint 形式でダウンロードして取り込みます。
 
 ```bash
 bunx astlide import https://docs.google.com/presentation/d/1AbC…/edit
 ```
 
+URL から取り込めるのは、共有設定が「リンクを知っている全員」になっているデッキだけです。非公開のデッキは、Google スライドの **ファイル → ダウンロード → Microsoft PowerPoint (.pptx)** でダウンロードし、そのファイルを取り込んでください。
+
 ## コードから使う
 
 ```ts
+import { readFile } from "node:fs/promises";
 import { pptxToSlides } from "@astlide/core/pptx";
 
 const deck = pptxToSlides(await readFile("talk.pptx"), {
-  // Where pictures and embedded fonts go (default: pictures inlined as data: URLs).
+  // Where pictures and embedded fonts go: return a URL, or null to leave the file out.
+  // Default: pictures inlined as data: URLs, embedded fonts left out.
   media: ({ name, data, type }) => saveSomewhere(name, data, type),
 });
 deck.slides[0].html;   // an Astlide .html slide body (1920×1080)
@@ -57,17 +74,17 @@ deck.slides[0].notes;  // speaker notes
 deck.theme;            // the master's theme colors and fonts
 ```
 
-## 変換される内容
+## 変換できるもの
 
-| PowerPoint 側 | Astlide 側 |
+| PowerPoint | Astlide |
 |---|---|
-| テキストボックスとプレースホルダー: フォント、サイズ、色、太字 / 斜体 / 下線、配置、箇条書きと番号付け、間隔、リンク | 位置指定したテキスト |
+| テキストボックスとプレースホルダー: フォント、サイズ、色、太字 / 斜体 / 下線、配置、箇条書きと番号付け、間隔、リンク | 位置を指定したテキスト |
 | 四角形、角丸四角形、楕円、矢印、吹き出し、よく使われるプリセット図形、フリーフォーム | CSS のボックスと SVG |
 | 単色・グラデーション・画像・タイル・パターンの塗りつぶし、枠線、破線、矢じり | CSS / SVG |
 | 画像（PNG、JPEG、GIF、SVG）、トリミング | `<img>` |
 | 表: セルの塗りつぶし、罫線、結合セル | `<table>` |
-| グループ、回転、反転 | transform |
+| グループ化、回転、反転 | transform |
 | 背景（スライド、レイアウト、マスター）、マスターとレイアウトの装飾 | スライドのキャンバス |
 | 埋め込みフォント | `@font-face` |
 
-グラフ、SmartArt、埋め込みオブジェクトは目印付きの枠として表示され、EMF / WMF 画像（ブラウザでは表示できません）は輪郭だけが表示されます。これらは画像として挿入し直してください。16:9 以外のスライドは上下または左右に余白を付けて表示されます。
+変換できないものもあります。グラフ、SmartArt、埋め込みオブジェクトは、「Chart」「SmartArt」「Object」と書かれた点線の枠になります。EMF や WMF のようにブラウザで表示できない形式の画像は、中身のない点線の枠になります。これらを残したい場合は、PowerPoint 側で PNG や SVG の画像に差し替えてください。16:9 以外のスライドは、上下か左右に余白を付けて表示します。
