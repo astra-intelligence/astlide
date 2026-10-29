@@ -43,6 +43,13 @@ export const deckConfigSchema = z.object({
 	 * Unknown names are warned at runtime in dev mode.
 	 */
 	theme: z.string().default("default"),
+	/**
+	 * Share image for the deck's slide pages: a root-relative path
+	 * (`/og/example-deck.png`) or an absolute URL. When set, slide pages emit
+	 * `og:image` and a `summary_large_image` `twitter:card` so a shared deck
+	 * link shows a picture instead of a blank card.
+	 */
+	ogImage: z.string().optional(),
 });
 
 export type DeckConfig = z.infer<typeof deckConfigSchema>;

@@ -4,7 +4,7 @@ import { slidePage } from "@astlide/core/deck/pages";
 import { themeName } from "@astlide/core/deck/print-view";
 import { DeckPage, Slide } from "@astlide/vue";
 import { defineComponent, h, onMounted, ref } from "vue";
-import { createError, navigateTo, useHead, useRoute } from "#app";
+import { createError, navigateTo, useHead, useRequestURL, useRoute } from "#app";
 import { findDeck, mermaidLoader, options, useMdxComponents } from "../shared";
 
 export default defineComponent({
@@ -25,12 +25,32 @@ export default defineComponent({
 		}
 		const { slide, number, totalSlides } = page;
 		const title = `${deck.config.title ?? deck.name} - Slide ${number}`;
+		// `_config.json` `ogImage` → absolute URL for crawlers. Root-relative paths
+		// resolve against the request origin + configured basePath; absolute URLs
+		// (http/https) pass through unchanged.
+		let ogImageUrl = deck.config.ogImage as string | undefined;
+		if (ogImageUrl && !/^https?:\/\//i.test(ogImageUrl)) {
+			const requestUrl = useRequestURL();
+			ogImageUrl = `${requestUrl.origin}${options.basePath ?? ""}${ogImageUrl.startsWith("/") ? ogImageUrl : `/${ogImageUrl}`}`;
+		}
 		useHead({
 			title,
 			htmlAttrs: { "data-theme": themeName(deck.config.theme) },
 			meta: [
 				{ name: "description", content: slide.description ?? title },
 				{ name: "robots", content: "noindex, nofollow" },
+				...(ogImageUrl
+					? [
+							{ property: "og:title", content: title },
+							{ property: "og:description", content: `Slide deck: ${title}` },
+							{ property: "og:type", content: "website" },
+							{ property: "og:image", content: ogImageUrl },
+							{ name: "twitter:card", content: "summary_large_image" },
+							{ name: "twitter:title", content: title },
+							{ name: "twitter:description", content: `Slide deck: ${title}` },
+							{ name: "twitter:image", content: ogImageUrl },
+						]
+					: []),
 			],
 		});
 		const components = useMdxComponents();

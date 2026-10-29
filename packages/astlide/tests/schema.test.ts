@@ -262,6 +262,22 @@ describe("deckConfigSchema", () => {
 		it("date is undefined when omitted", () => {
 			expect(deckConfigSchema.parse({}).date).toBeUndefined();
 		});
+
+		it("accepts ogImage path", () => {
+			expect(deckConfigSchema.parse({ ogImage: "/og/example-deck.png" }).ogImage).toBe(
+				"/og/example-deck.png",
+			);
+		});
+
+		it("accepts ogImage absolute URL", () => {
+			expect(deckConfigSchema.parse({ ogImage: "https://example.com/og.png" }).ogImage).toBe(
+				"https://example.com/og.png",
+			);
+		});
+
+		it("ogImage is undefined when omitted", () => {
+			expect(deckConfigSchema.parse({}).ogImage).toBeUndefined();
+		});
 	});
 
 	// ── Unknown fields are stripped ──

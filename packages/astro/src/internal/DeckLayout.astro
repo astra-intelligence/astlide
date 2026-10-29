@@ -51,6 +51,8 @@ interface Props {
   sourcePath?: string;
   /** Dev only: the deck's source files in slide order (live updates on add/remove). */
   deckSources?: string[];
+  /** Share image for this deck (root-relative path or absolute URL), from `_config.json` `ogImage`. */
+  ogImage?: string;
   /**
    * Neighbouring and first / last slides to navigate to. In production these
    * skip hidden slides (which only redirect); default: the adjacent numbers.
@@ -61,7 +63,7 @@ interface Props {
   lastSlide?: number;
 }
 
-const { title, theme = 'default', currentSlide, totalSlides, deck, notes, transition = 'fade', context, outline = [], sourcePath, deckSources } = Astro.props;
+const { title, theme = 'default', currentSlide, totalSlides, deck, notes, transition = 'fade', context, outline = [], sourcePath, deckSources, ogImage } = Astro.props;
 const {
   prevSlide = currentSlide > 1 ? currentSlide - 1 : null,
   nextSlide = currentSlide < totalSlides ? currentSlide + 1 : null,
@@ -83,6 +85,17 @@ const chrome: DeckChromeProps = {
   noNotesText: noNotes,
 };
 const indexable = typeof __ASTLIDE_INDEXABLE__ !== 'undefined' ? __ASTLIDE_INDEXABLE__ : false;
+// `_config.json` `ogImage` → absolute URL for crawlers. Root-relative paths are
+// resolved against Astro's configured `site` when present; otherwise the
+// `base`-aware path is kept (works for sub-path deploys).
+const ogImageUrl =
+  ogImage && /^https?:\/\//i.test(ogImage)
+    ? ogImage
+    : ogImage && Astro.site
+      ? new URL(withBase(ogImage), Astro.site).href
+      : ogImage
+        ? withBase(ogImage)
+        : undefined;
 const runtimeConfig = JSON.stringify({
   trailingSlash, currentSlide, totalSlides, prevSlide, nextSlide, firstSlide, lastSlide,
   deck, deckContext: context ?? null, outline, basePath, persistDrawings,
@@ -101,6 +114,15 @@ const runtimeConfig = JSON.stringify({
     <meta property="og:title" content={title} />
     <meta property="og:description" content={`Slide deck: ${title}`} />
     <meta property="og:type" content="website" />
+    {ogImageUrl && (
+      <>
+        <meta property="og:image" content={ogImageUrl} />
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={`Slide deck: ${title}`} />
+        <meta name="twitter:image" content={ogImageUrl} />
+      </>
+    )}
     {!indexable && <meta name="robots" content="noindex, nofollow" />}
     {nextSlide && <link rel="prefetch" href={slideHref(nextSlide)} />}
     <FontLinks />

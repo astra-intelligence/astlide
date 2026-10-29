@@ -100,6 +100,7 @@ Put `_config.json` in the deck's folder, next to its slides. Every field is opti
 | `author` | `string` | none | Shown on the deck index. |
 | `date` | `string` | none | A date such as `"2025-06-01"`, shown on the deck index. A value that isn't a valid date isn't shown. |
 | `theme` | `string` | `"default"` | The theme for every slide in the deck: a built-in theme, a plugin theme, or a name from `templates`. |
+| `ogImage` | `string` | none | Share image for the deck's slide pages: a root-relative path (`/og/example-deck.png`) or an absolute URL. When set, slide pages emit `og:image` and a `summary_large_image` `twitter:card`, so a shared deck link shows a picture. |
 
 If `_config.json` isn't valid JSON, or a field has the wrong type, the deck uses the defaults. The dev server shows the error on the slide.
 
